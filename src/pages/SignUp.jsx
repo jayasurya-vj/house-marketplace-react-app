@@ -1,10 +1,13 @@
 import React from 'react'
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from 'react'
-import {Link,Navigate,useNavigate} from 'react-router-dom'
+import {Link,useNavigate} from 'react-router-dom'
+import {doc,setDoc,serverTimestamp} from 'firebase/firestore';
 import { ReactComponent as ArrowRightIcon } from '../assets/svg/keyboardArrowRightIcon.svg'
 import visibilityIcon from '../assets/svg/visibilityIcon.svg'
-import {app} from '../firebase.config' 
+import {app,db} from '../firebase.config' 
+import { toast } from 'react-toastify'
+import OAuth from '../components/OAuth';
 
 
 function SignUp() {
@@ -41,10 +44,16 @@ function SignUp() {
         displayName: name
       })
 
+      const formDataCopy = {...formData}
+      delete formDataCopy.password;
+      formDataCopy.timestamp = serverTimestamp()
+      setDoc(doc(db,'users',user.uid),formDataCopy);
+
       navigate('/');
 
     }catch(error){
       console.log(error);
+      toast.error("something went wrong with the Registration")
     }
 
   }
@@ -106,6 +115,7 @@ function SignUp() {
           </div>
         </form>
 
+        <OAuth />
 
         <Link to='/sign-in' className='registerLink'>
           Sign In Instead
